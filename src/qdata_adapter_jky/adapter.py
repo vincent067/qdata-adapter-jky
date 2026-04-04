@@ -224,6 +224,15 @@ class JkyAdapter(BaseAppAdapter):
             result = await self._interface.create_object(object_type, data)
             return {"data": result}
 
+        elif method == "update":
+            if not data:
+                raise ValueError("'update' method requires data")
+            object_id = data.get("id") or data.get("vendId") or params.get("id") if params else None
+            if not object_id:
+                raise ValueError("'update' method requires data['id'] or data['vendId'] or params['id']")
+            result = await self._interface.update_object(object_type, object_id, data)
+            return {"data": result}
+
         else:
             raise NotImplementedError(
                 f"Method '{method}' not implemented in interface. "

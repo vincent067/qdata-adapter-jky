@@ -391,22 +391,141 @@ class JkyAdapterStandardInterface(BaseInterface):
 
     async def create_object(self, object_type: str, data: dict[str, Any]) -> dict[str, Any]:
         """
-        创建对象（暂不支持）
+        创建对象
 
         Args:
-            object_type: 对象类型
+            object_type: 对象类型，对应 API method
             data: 对象数据
 
         Returns:
             创建后的对象
-
-        Raises:
-            NotImplementedError: 此接口暂不支持写操作
         """
-        raise NotImplementedError(
-            "Create operations are not supported in this adapter. "
-            "This adapter is read-only."
-        )
+        request_params = self._build_request_params(object_type, data)
+
+        try:
+            response = await self.http_client.post(
+                self._host,
+                data=request_params,
+                headers={"Content-Type": "application/x-www-form-urlencoded"},
+            )
+
+            return self._extract_single_data(response)
+
+        except JkyAdapterAPIError:
+            raise
+        except Exception as e:
+            raise JkyAdapterAPIError(
+                f"Failed to create {object_type}",
+                details={"object_type": object_type, "data": data, "error": str(e)},
+            ) from e
+
+    async def update_object(
+        self,
+        object_type: str,
+        object_id: str,
+        data: dict[str, Any],
+    ) -> dict[str, Any]:
+        """
+        更新对象
+
+        Args:
+            object_type: 对象类型，对应 API method
+            object_id: 对象 ID
+            data: 更新数据
+
+        Returns:
+            更新后的对象
+        """
+        # 将 object_id 加入到 data 中
+        data_with_id = {"id": object_id, **data}
+        request_params = self._build_request_params(object_type, data_with_id)
+
+        try:
+            response = await self.http_client.post(
+                self._host,
+                data=request_params,
+                headers={"Content-Type": "application/x-www-form-urlencoded"},
+            )
+
+            return self._extract_single_data(response)
+
+        except JkyAdapterAPIError:
+            raise
+        except Exception as e:
+            raise JkyAdapterAPIError(
+                f"Failed to update {object_type}",
+                details={"object_type": object_type, "object_id": object_id, "error": str(e)},
+            ) from e
+
+    async def invoke(
+        self,
+        method: str,
+        object_type: str,
+        data: dict[str, Any] | None = None,
+        params: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """
+        统一的 API 调用方法
+
+        Args:
+            method: API 方法名，如 "query", "get", "create", "update"
+            object_type: 对象类型，如 "erp.vend.get"
+            data: 请求体数据（用于 create/update 等）
+            params: 查询参数（用于 query/get 等）
+
+        Returns:
+            API 响应数据
+        """
+        if method in ("list", "query"):
+            results = []
+            async for item in self.list_objects(
+                object_type, filters=params, page_size=100
+            ):
+                results.append(item)
+            return {"data": results, "total": len(results)}
+
+        elif method == "get":
+            # 对于 erp.vend.get 等接口，使用 code 参数而不是 id
+            request_params = self._build_request_params(object_type, params or {})
+            try:
+                response = await self.http_client.post(
+                    self._host,
+                    data=request_params,
+                    headers={"Content-Type": "application/x-www-form-urlencoded"},
+                )
+                result = self._extract_single_data(response)
+                return {"data": result}
+            except Exception as e:
+                raise JkyAdapterAPIError(
+                    f"Failed to invoke {object_type}",
+                    details={"method": method, "params": params, "error": str(e)},
+                ) from e
+
+        elif method == "create":
+            if not data:
+                raise ValueError("'create' method requires data")
+            result = await self.create_object(object_type, data)
+            return {"data": result}
+
+        elif method == "update":
+            if not data:
+                raise ValueError("'update' method requires data")
+            # 从 data 中获取 object_id（可能是 id, vendId 等）
+            object_id = (
+                data.get("id")
+                or data.get("vendId")
+                or (params.get("id") if params else None)
+            )
+            if not object_id:
+                raise ValueError("'update' method requires data['id'] or data['vendId']")
+            result = await self.update_object(object_type, object_id, data)
+            return {"data": result}
+
+        else:
+            raise NotImplementedError(
+                f"Method '{method}' not implemented in interface. "
+                f"Please override invoke() in your interface class."
+            )
 
     async def health_check(self) -> bool:
         """
