@@ -1,0 +1,8 @@
+# Production dependencies
+# 注意：主要依赖在 pyproject.toml 中定义
+# 此文件用于兼容传统安装方式
+
+qdata-adapter-base>=1.0.0
+httpx>=0.25.0
+pydantic>=2.0.0
+tenacity>=8.2.0

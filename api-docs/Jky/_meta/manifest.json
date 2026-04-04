@@ -1,0 +1,18 @@
+{
+  "version": "1.0",
+  "platform_code": "Jky",
+  "platform_name": "吉客云·开放平台",
+  "extracted_at": "2026-04-03T05:36:25Z",
+  "crawler_info": {
+    "crawler_name": "jky_crawler",
+    "crawler_version": "1.0.0",
+    "crawl_started_at": "2026-04-03T05:36:25Z",
+    "crawl_finished_at": "2026-04-03T05:36:25Z",
+    "login_mode": "none",
+    "login_note": "无需登录即可访问 API 列表"
+  },
+  "source_urls": [
+    "https://open.jackyun.com/developer/apidocinfo.html"
+  ],
+  "format_version": "1.0"
+}
