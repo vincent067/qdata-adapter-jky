@@ -32,6 +32,7 @@ async def main():
         auth_config = {
             "app_key": os.getenv("JKY_QIMEN_APP_KEY", ""),
             "app_secret": os.getenv("JKY_QIMEN_APP_SECRET", ""),
+            "target_app_key": os.getenv("JKY_QIMEN_TARGET_APP_KEY", ""),
             "jkyappkey": os.getenv("JKY_QIMEN_JKY_APP_KEY", ""),
             "jkyappsecret": os.getenv("JKY_QIMEN_JKY_APP_SECRET", ""),
             "jkycustomerid": os.getenv("JKY_QIMEN_CUSTOMER_ID", ""),
