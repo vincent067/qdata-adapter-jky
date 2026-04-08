@@ -7,7 +7,7 @@ name = "qdata-adapter-jky"
 version = "0.1.0"
 description = "QDataV2 adapter for jky"
 readme = "README.md"
-license = {text = "AGPL-3.0"}
+license = {text = "MIT"}
 authors = [
     {name = "广东轻亿云软件科技有限公司", email = "opensource@qeasy.cloud"}
 ]
@@ -19,7 +19,7 @@ keywords = ["qdata", "adapter", "jky", "integration", "qeasy"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
