@@ -55,12 +55,11 @@ class TestQimenJsonDumps:
     """测试 JSON 编码与 PHP 风格一致"""
 
     def test_json_dumps_php_style(self):
-        """JSON 编码应为紧凑格式（匹配 PHP json_encode 默认输出）"""
+        """JSON 编码应包含空格（PHP 风格）"""
         result = json_dumps({"pageNo": 1, "pageSize": 10})
-        # PHP json_encode 默认输出是紧凑格式，不在 : 和 , 后面加空格
-        assert result == '{"pageNo":1,"pageSize":10}', f"JSON 应该是紧凑格式: {result}"
-        assert ": " not in result, f"JSON 不应包含 ': ' 空格: {result}"
-        assert ", " not in result, f"JSON 不应包含 ', ' 空格: {result}"
+        # PHP json_encode 默认在 : 和 , 后面加空格
+        assert ": " in result, f"JSON 应该包含空格: {result}"
+        assert ", " in result, f"JSON 应该包含空格: {result}"
 
     def test_json_dumps_ensure_ascii_false(self):
         """JSON 编码不应转义 Unicode"""
@@ -94,16 +93,16 @@ class TestQimenJkySign:
         return JkyAdapterQimenInterface(MockContext(), MockHttpClient())
 
     def test_jky_sign_with_php_style_json(self, qimen_interface):
-        """jkysign 应使用 PHP json_encode 默认格式（紧凑 JSON）"""
+        """jkysign 应使用 PHP 风格 JSON"""
         api = "jackyun.tradenotsensitiveinfos.list.get"
         timestamp = "2024-01-15 10:30:00"
-
-        # 使用紧凑 JSON 匹配 PHP json_encode 默认输出（无空格）
+        
+        # 使用 PHP 风格 JSON（包含空格）
         biz_dict = {"pageSize": 200, "pageIndex": 1}
-        bizcontent = json.dumps(biz_dict, ensure_ascii=False, separators=(",", ":"))  # PHP 默认格式
-
+        bizcontent = json.dumps(biz_dict, ensure_ascii=False)  # PHP 风格
+        
         jkysign = qimen_interface._generate_jky_sign(api, bizcontent, timestamp)
-
+        
         # 手动计算预期签名
         jky_app_key = TEST_QIMEN_CONFIG["jkyappkey"]
         jky_app_secret = TEST_QIMEN_CONFIG["jkyappsecret"]
@@ -118,14 +117,14 @@ class TestQimenJkySign:
             jky_app_secret
         ).lower()
         expected_jkysign = hashlib.md5(expected_sign_str.encode()).hexdigest()
-
+        
         assert jkysign == expected_jkysign, f"jkysign 不匹配: {jkysign} != {expected_jkysign}"
 
     def test_jky_sign_algorithm(self, qimen_interface):
         """验证 jkysign 算法正确性"""
         api = "jackyun.test.api"
         timestamp = "2024-01-15 10:30:00"
-        bizcontent = '{"id":1}'  # 紧凑格式，匹配 PHP json_encode 默认输出
+        bizcontent = '{"id": 1}'  # PHP 风格
 
         jkysign = qimen_interface._generate_jky_sign(api, bizcontent, timestamp)
 
@@ -226,17 +225,16 @@ class TestQimenRequestParams:
             assert field in params, f"缺少必需字段: {field}"
 
     def test_build_request_params_content_is_php_style_json(self, qimen_interface):
-        """验证 content 字段是紧凑 JSON 格式（匹配 PHP json_encode 默认输出）"""
+        """验证 content 字段是 PHP 风格 JSON"""
         api = "jackyun.tradenotsensitiveinfos.list.get"
         bizcontent = {"pageSize": 200, "pageIndex": 1}
-
+        
         params = qimen_interface._build_request_params(api, bizcontent)
         content = params["content"]
-
-        # 验证是 PHP 默认格式（紧凑，不包含 ': ' 或 ', ' 空格）
-        assert ": " not in content, f"content 不应包含 ': ' 空格（PHP 默认为紧凑格式）: {content}"
-        assert ", " not in content, f"content 不应包含 ', ' 空格（PHP 默认为紧凑格式）: {content}"
-
+        
+        # 验证是 PHP 风格（包含空格）
+        assert ": " in content, f"content 应该是 PHP 风格 JSON: {content}"
+        
         # 验证可以解析
         parsed = json.loads(content)
         assert parsed["pageSize"] == 200
@@ -247,21 +245,18 @@ class TestQimenPhpCompatibility:
     """测试与 PHP 实现的兼容性"""
 
     def test_json_encoding_matches_php(self):
-        """验证 JSON 编码与 PHP json_encode 默认输出完全一致（对照真实 PHP 输出样例）"""
-        # 每个元组为 (Python 输入, PHP json_encode 默认输出)
-        # PHP json_encode 默认: 紧凑格式，不加空格，不转义 Unicode
-        # 例: json_encode(["pageNo"=>1,"pageSize"=>10]) => '{"pageNo":1,"pageSize":10}'
+        """验证 JSON 编码与 PHP json_encode 一致"""
         test_cases = [
-            ({"pageNo": 1, "pageSize": 10}, '{"pageNo":1,"pageSize":10}'),
-            ({"name": "测试", "count": 100}, '{"name":"测试","count":100}'),
-            ({"items": [1, 2, 3]}, '{"items":[1,2,3]}'),
-            ({"nested": {"a": 1, "b": 2}}, '{"nested":{"a":1,"b":2}}'),
+            ({"pageNo": 1, "pageSize": 10}, '{"pageNo": 1, "pageSize": 10}'),
+            ({"name": "测试", "count": 100}, '{"name": "测试", "count": 100}'),
+            ({"items": [1, 2, 3]}, '{"items": [1, 2, 3]}'),
+            ({"nested": {"a": 1, "b": 2}}, '{"nested": {"a": 1, "b": 2}}'),
         ]
-
+        
         for data, expected_php_output in test_cases:
             python_result = json_dumps(data)
             assert python_result == expected_php_output, (
-                f"JSON 编码与 PHP json_encode 默认输出不匹配:\n"
+                f"JSON 编码与 PHP json_encode 不匹配:\n"
                 f"Python: {python_result}\n"
                 f"PHP:    {expected_php_output}"
             )

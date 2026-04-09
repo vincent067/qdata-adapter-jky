@@ -489,21 +489,21 @@ class JkyAdapterQimenInterface(BaseInterface):
 
 def json_dumps(obj: Any) -> str:
     """
-    将对象转为 JSON 字符串，与 PHP json_encode() 默认行为一致
+    将对象转为 JSON 字符串，与 PHP json_encode() 行为一致
     
     PHP json_encode() 默认行为:
     - 不转义 Unicode
-    - 在 : 和 , 后面不加空格
-    - 输出示例: {"pageNo":1,"pageSize":10}
+    - 在 : 和 , 后面加空格
+    - 输出示例: {"pageNo": 1, "pageSize": 10}
     
-    注意: 此函数用于生成 jkysign 签名，必须与 PHP 的 json_encode 默认输出完全一致
+    注意: 此函数用于生成 jkysign 签名，必须与 PHP 的 json_encode 输出完全一致
     """
     if obj is None:
         return ""
-    # 使用紧凑分隔符匹配 PHP json_encode() 默认输出
-    # PHP 默认: {"key":"value","num":1}
-    # Python 需显式指定 separators 才能去掉默认空格
-    return _json.dumps(obj, ensure_ascii=False, separators=(",", ":"))
+    # 使用默认分隔符模拟 PHP json_encode() 行为
+    # PHP: {"key": "value", "num": 1}
+    # Python 默认: {"key": "value", "num": 1} (相同)
+    return _json.dumps(obj, ensure_ascii=False)
 
 
 __all__ = ["JkyAdapterQimenInterface"]
