@@ -38,23 +38,14 @@ from typing import Any
 import pytest
 from qdata_adapter import ConnectorContext
 
-# 尝试加载 python-dotenv
-# 如果未安装，使用 mock 实现
-try:
-    from dotenv import load_dotenv
-    load_dotenv()  # 加载 .env 文件
-except ImportError:
-    def load_dotenv(*args, **kwargs):
-        pass
-
-
 # =============================================================================
 # 配置常量
 # =============================================================================
 
 ADAPTER_NAME = "jky"
-BASE_URL = os.getenv(f"{ADAPTER_NAME.upper()}_BASE_URL", "https://api.example.com")
-ENVIRONMENT = os.getenv(f"{ADAPTER_NAME.upper()}_ENVIRONMENT", "sandbox")
+# 测试使用固定的 base_url，不从环境变量读取
+BASE_URL = "https://api.example.com"
+ENVIRONMENT = "sandbox"
 USE_REAL_API = os.getenv("USE_REAL_API", "false").lower() == "true"
 RECORD_TRAFFIC = os.getenv("RECORD_HTTP_TRAFFIC", "false").lower() == "true"
 TEST_DATA_DIR = Path(os.getenv("TEST_DATA_DIR", "tests/data"))
@@ -127,14 +118,13 @@ def standard_auth_config() -> dict[str, str]:
     """
     standard 接口认证配置
 
-    优先从环境变量读取，使用默认值作为 fallback。
-    如需真实测试，请在 .env 文件中配置真实凭据。
+    使用测试占位符，确保测试可重复且无需真实凭据。
+    如需真实 API 测试，请设置 USE_REAL_API=true 并在 .env 中配置。
     """
-    prefix = ADAPTER_NAME.upper()
     return {
-        "client_id": os.getenv(f"{prefix}_CLIENT_ID", "test-client-id"),
-        "client_secret": os.getenv(f"{prefix}_CLIENT_SECRET", "test-client-secret"),
-        "token_url": os.getenv(f"{prefix}_TOKEN_URL", f"{BASE_URL}/oauth/token"),
+        "AppKey": "test-app-key-12345",
+        "AppSecret": "test-app-secret-1234567890abcdef",
+        "token": "test-token-123",
     }
 
 @pytest.fixture
