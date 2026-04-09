@@ -488,13 +488,22 @@ class JkyAdapterQimenInterface(BaseInterface):
 
 
 def json_dumps(obj: Any) -> str:
-    """将对象转为 JSON 字符串，确保返回 str 类型（不是 bytes）"""
-    try:
-        import orjson
-        # orjson.dumps 返回 bytes，需要解码
-        return orjson.dumps(obj, option=orjson.OPT_NON_STR_KEYS).decode("utf-8")
-    except ImportError:
-        return _json.dumps(obj, ensure_ascii=False)
+    """
+    将对象转为 JSON 字符串，与 PHP json_encode() 行为一致
+    
+    PHP json_encode() 默认行为:
+    - 不转义 Unicode
+    - 在 : 和 , 后面加空格
+    - 输出示例: {"pageNo": 1, "pageSize": 10}
+    
+    注意: 此函数用于生成 jkysign 签名，必须与 PHP 的 json_encode 输出完全一致
+    """
+    if obj is None:
+        return ""
+    # 使用默认分隔符模拟 PHP json_encode() 行为
+    # PHP: {"key": "value", "num": 1}
+    # Python 默认: {"key": "value", "num": 1} (相同)
+    return _json.dumps(obj, ensure_ascii=False)
 
 
 __all__ = ["JkyAdapterQimenInterface"]

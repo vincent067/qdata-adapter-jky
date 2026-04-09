@@ -143,12 +143,16 @@ def qimen_auth_config() -> dict[str, str]:
     qimen 接口认证配置
 
     优先从环境变量读取，使用默认值作为 fallback。
+    如需真实测试，请在 .env 文件中配置真实凭据。
     """
     prefix = ADAPTER_NAME.upper()
     return {
-        "app_key": os.getenv(f"{prefix}_APP_KEY", "test-app-key"),
-        "app_secret": os.getenv(f"{prefix}_APP_SECRET", "test-app-secret"),
-        "customer_id": os.getenv(f"{prefix}_CUSTOMER_ID", "test-customer-id"),
+        "app_key": os.getenv(f"{prefix}_QIMEN_APP_KEY", "test-qimen-app-key"),
+        "app_secret": os.getenv(f"{prefix}_QIMEN_APP_SECRET", "test-qimen-app-secret"),
+        "target_app_key": os.getenv(f"{prefix}_QIMEN_TARGET_APP_KEY", "test-target-app-key"),
+        "jkyappkey": os.getenv(f"{prefix}_QIMEN_JKY_APP_KEY", "test-jky-app-key"),
+        "jkyappsecret": os.getenv(f"{prefix}_QIMEN_JKY_APP_SECRET", "test-jky-app-secret"),
+        "jkycustomerid": os.getenv(f"{prefix}_QIMEN_CUSTOMER_ID", "test-customer-id"),
     }
 
 
