@@ -120,40 +120,47 @@ python examples/quickstart.py
 ### Qimen 接口使用示例
 
 ```python
+import asyncio
+
 from qdata_adapter_jky import JkyAdapter
 from qdata_adapter import ConnectorContext
 
-# 配置 Qimen 接口
-context = ConnectorContext(
-    connector_id="my-qimen-connector",
-    app_software_code="jky",
-    base_url="https://zci2vl4joy.api.taobao.com/router/qm",
-    auth_config={
-        "app_key": "your-qimen-app-key",
-        "app_secret": "your-qimen-app-secret",
-        "target_app_key": "your-target-app-key",
-        "jkyappkey": "your-jky-app-key",
-        "jkyappsecret": "your-jky-app-secret",
-        "jkycustomerid": "your-customer-id",
-    },
-    settings={"interface": "qimen"},
-)
 
-adapter = JkyAdapter(context)
+async def main():
+    # 配置 Qimen 接口
+    context = ConnectorContext(
+        connector_id="my-qimen-connector",
+        app_software_code="jky",
+        base_url="https://zci2vl4joy.api.taobao.com/router/qm",
+        auth_config={
+            "app_key": "your-qimen-app-key",
+            "app_secret": "your-qimen-app-secret",
+            "target_app_key": "your-target-app-key",
+            "jkyappkey": "your-jky-app-key",
+            "jkyappsecret": "your-jky-app-secret",
+            "jkycustomerid": "your-customer-id",
+        },
+        settings={"interface": "qimen"},
+    )
 
-# 查询订单
-result = await adapter.invoke(
-    method="query",
-    object_type="jackyun.tradenotsensitiveinfos.list.get",
-    params={
-        "pageSize": "200",
-        "pageIndex": 1,
-        "startConsignTime": "2024-01-01 00:00:00",
-        "endConsignTime": "2024-01-31 23:59:59",
-        "tradeType": "1",
-        "fields": "tradeNo,postFee,tradeStatus,goodsDetail"
-    }
-)
+    adapter = JkyAdapter(context)
+
+    # 查询订单
+    result = await adapter.invoke(
+        method="query",
+        object_type="jackyun.tradenotsensitiveinfos.list.get",
+        params={
+            "pageSize": "200",
+            "pageIndex": 1,
+            "startConsignTime": "2024-01-01 00:00:00",
+            "endConsignTime": "2024-01-31 23:59:59",
+            "tradeType": "1",
+            "fields": "tradeNo,postFee,tradeStatus,goodsDetail"
+        }
+    )
+
+
+asyncio.run(main())
 ```
 
 ## 接口对比
