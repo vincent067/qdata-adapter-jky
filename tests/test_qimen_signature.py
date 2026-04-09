@@ -125,7 +125,7 @@ class TestQimenJkySign:
         """验证 jkysign 算法正确性"""
         api = "jackyun.test.api"
         timestamp = "2024-01-15 10:30:00"
-        bizcontent = '{"id": 1}'  # PHP 风格
+        bizcontent = '{"id":1}'  # 紧凑格式，匹配 PHP json_encode 默认输出
 
         jkysign = qimen_interface._generate_jky_sign(api, bizcontent, timestamp)
 
