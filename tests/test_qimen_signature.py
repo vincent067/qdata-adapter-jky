@@ -31,7 +31,6 @@
 
 import hashlib
 import json
-import os
 import pytest
 
 from qdata_adapter_jky.interfaces.qimen import (
