@@ -195,8 +195,10 @@ class JkyAdapterStandardInterface(BaseInterface):
 
         logger.debug("Authentication configured for AppKey: %s", app_key[:8] + "...")
         return {
+            "access_token": token,
+            "token_type": "Bearer",
+            "expires_in": 7200,
             "app_key": app_key,
-            "token": token,
             "authenticated": True,
         }
 

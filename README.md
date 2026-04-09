@@ -37,7 +37,7 @@
 | 接口 | 说明 | 适用场景 |
 |------|------|---------|
 | `standard`（默认） | 主接口 | 标准业务集成 |
-| `qimen` | 奇门网关接口 | 特殊网关需求 |
+| `qimen` | 奇门网关接口 | 淘系订单对接 |
 
 ## 统一调用方式
 
@@ -109,11 +109,68 @@ python examples/quickstart.py
 
 | 环境变量 | 说明 |
 |----------|------|
-| `JKY_QIMEN_APP_KEY` | 应用密钥 |
-| `JKY_QIMEN_APP_SECRET` | 应用密码 |
-| `JKY_QIMEN_JKY_APP_KEY` | 吉客云应用 Key |
-| `JKY_QIMEN_JKY_APP_SECRET` | 吉客云应用密钥 |
+| `JKY_QIMEN_HOST` | 奇门网关地址（默认：https://zci2vl4joy.api.taobao.com/router/qm） |
+| `JKY_QIMEN_APP_KEY` | 奇门 AppKey |
+| `JKY_QIMEN_APP_SECRET` | 奇门 AppSecret |
+| `JKY_QIMEN_TARGET_APP_KEY` | 奇门网关 ERP 应用标识 |
+| `JKY_QIMEN_JKY_APP_KEY` | 吉客云开放平台 AppKey |
+| `JKY_QIMEN_JKY_APP_SECRET` | 吉客云开放平台 AppSecret |
 | `JKY_QIMEN_CUSTOMER_ID` | 吉客云客户 ID |
+
+### Qimen 接口使用示例
+
+```python
+import asyncio
+
+from qdata_adapter_jky import JkyAdapter
+from qdata_adapter import ConnectorContext
+
+
+async def main():
+    # 配置 Qimen 接口
+    context = ConnectorContext(
+        connector_id="my-qimen-connector",
+        app_software_code="jky",
+        base_url="https://zci2vl4joy.api.taobao.com/router/qm",
+        auth_config={
+            "app_key": "your-qimen-app-key",
+            "app_secret": "your-qimen-app-secret",
+            "target_app_key": "your-target-app-key",
+            "jkyappkey": "your-jky-app-key",
+            "jkyappsecret": "your-jky-app-secret",
+            "jkycustomerid": "your-customer-id",
+        },
+        settings={"interface": "qimen"},
+    )
+
+    adapter = JkyAdapter(context)
+
+    # 查询订单
+    result = await adapter.invoke(
+        method="query",
+        object_type="jackyun.tradenotsensitiveinfos.list.get",
+        params={
+            "pageSize": "200",
+            "pageIndex": 1,
+            "startConsignTime": "2024-01-01 00:00:00",
+            "endConsignTime": "2024-01-31 23:59:59",
+            "tradeType": "1",
+            "fields": "tradeNo,postFee,tradeStatus,goodsDetail"
+        }
+    )
+
+
+asyncio.run(main())
+```
+
+## 接口对比
+
+| 特性 | Standard | Qimen |
+|------|----------|-------|
+| 认证方式 | Token + Sign | 双签名（jkysign + taobao sign） |
+| 适用场景 | 标准业务接口 | 淘系订单、奇门网关 |
+| 签名算法 | MD5 | MD5（双层） |
+| JSON 格式 | 紧凑 | PHP 风格（带空格） |
 
 ## License
 
